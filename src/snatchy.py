@@ -44,14 +44,8 @@ def snatch_snatch():
     search.submit()
 
     time.sleep(1)
-    site = driver.get(f"https://old.reddit.com/user/{user}/saved/")
-    if site == None:
-        driver.close()
-        page_not_found()
-        return None
-    else:
-        pass
-
+    driver.get(f"https://old.reddit.com/user/{user}/saved/")
+    
 
     while True:
         stored_pics = []
