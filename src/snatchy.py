@@ -45,7 +45,7 @@ def snatch_snatch():
 
     time.sleep(1)
     driver.get(f"https://old.reddit.com/user/{user}/saved/")
-    
+
 
     while True:
         stored_pics = []

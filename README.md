@@ -1,5 +1,5 @@
 # snatchy
-> Snatchy uses Selenium to grab all the pictures and gifs saved on your reddit profile then stores them in a given location.
+> Snatchy uses Selenium to locate all pictures and gifs in the saved section of your Reddit profile, then stores them to your directory of choice.
  
  # Example
  
