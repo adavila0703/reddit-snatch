@@ -1,55 +1,124 @@
-from selenium import webdriver
+import os
+import subprocess
 import time
+import tkinter as tk
+from tkinter import filedialog
+
+import requests
+from requests.exceptions import MissingSchema
+from selenium import webdriver
 from selenium.common.exceptions import InvalidArgumentException, NoSuchElementException
-from selenium.webdriver.common.keys import Keys
 
 
-driver = webdriver.Chrome('chromedriver.exe')
-
-user = ''
-driver.get(f"https://old.reddit.com/login")
-search = driver.find_element_by_id('user_login')
-search.send_keys(user)
-
-search = driver.find_element_by_id('passwd_login')
-search.send_keys('')
-
-search.submit()
-time.sleep(1)
-driver.get(f"https://old.reddit.com/user/{user}/saved/")
-images = driver.find_elements_by_class_name('expando')
-# while True:
-#     stored_pics = []
-#     count = 0
-#     for i in images:
-#         try:
-#             stored_pics.insert(count, i.get_attribute('data-cachedhtml').split()[8].split('"')[1])
-#         except AttributeError:
-#             pass
-#         count += 1
-#
-#     for s in stored_pics:
-#         print(s)
-#         try:
-#             name = s.split()[0].split('/')[3].split('.')[0]
-#         except IndexError:
-#             name = 'null'
-#         try:
-#             driver.get(s)
-#             driver.get_screenshot_as_file(s)
-#             driver.save_screenshot(f'pictures/{name}.png')
-#             time.sleep(.5)
-#         except InvalidArgumentException:
-#             pass
-#     try:
-#         find_next = driver.find_element_by_class_name('next-button')
-#         next_page = find_next.find_element_by_css_selector('a').get_attribute('href')
-#         driver.get(next_page)
-#         print('next page')
-#     except NoSuchElementException:
-#         print('no next page')
-#         break
-driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL't')
+def snatch_snatch():
+    page_count = 0
+    driver = webdriver.Chrome('chromedriver.exe')
 
 
+    user = urname_text.get()
+    password = pass_text.get()
 
+    driver.get(f"https://old.reddit.com/login")
+
+    search = driver.find_element_by_id('user_login')
+    search.send_keys(user)
+
+    search = driver.find_element_by_id('passwd_login')
+    search.send_keys(password)
+
+    search.submit()
+
+    time.sleep(1)
+    driver.get(f"https://old.reddit.com/user/{user}/saved/")
+
+    while True:
+        stored_pics = []
+        count = 0
+        images = driver.find_elements_by_class_name('expando')
+
+        for i in images:
+            try:
+                stored_pics.insert(count, i.get_attribute('data-cachedhtml').split()[8].split('"')[1])
+            except AttributeError:
+                pass
+            except IndexError:
+                pass
+            count += 1
+
+        for s in stored_pics:
+            print(s)
+            try:
+                name = s.split()[0].split('/')[3].split('.')[0]
+                type = s.split()[0].split('/')[3].split('.')[1]
+                if 'png' in type or 'jpg' in type:
+                    request = requests.get(s)
+                    file = open(f'{path_text.get()}/{name}.png', 'wb')
+                    file.write(request.content)
+                    file.close()
+                elif 'gifv' in type or 'gif' in type:
+                    request = requests.get(s)
+                    file = open(f'{path_text.get()}/{name}.gif', 'wb')
+                    file.write(request.content)
+                    file.close()
+                else:
+                    pass
+            except InvalidArgumentException:
+                pass
+            except MissingSchema:
+                pass
+            except IndexError:
+                pass
+
+        try:
+            find_next = driver.find_element_by_class_name('next-button')
+            next_page = find_next.find_element_by_css_selector('a').get_attribute('href')
+        except NoSuchElementException:
+            break
+        except NameError:
+            break
+        page_count += 1
+        print("PAGE COUNT" + str(page_count))
+        driver.get(next_page)
+
+    time.sleep(1)
+    driver.quit()
+    driver.close()
+
+
+def path():
+    root.directory = filedialog.askdirectory()
+    path_text.insert(1, root.directory)
+
+
+root = tk.Tk()
+w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+# root.geometry("%dx%d+0+0" % (w, h))
+root.geometry('300x200')
+root.title('Snatchy')
+
+root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(file='reddit.png'))
+
+urname_label = tk.Label(text='User Name')
+urname_label.grid(row=1, column=1)
+urname_text = tk.Entry(root)
+urname_text.grid(row=2, column=1)
+
+pass_label = tk.Label(text='Password')
+pass_label.grid(row=3, column=1)
+pass_text = tk.Entry(root)
+pass_text.grid(row=4, column=1)
+
+
+pass_label = tk.Label(text='Path')
+pass_label.grid(row=5, column=1)
+path_text = tk.Entry(root, width=50)
+path_text.grid(row=6, column=1)
+
+path_btn = tk.Button(root, height=1, width=20, text="Choose Path", command=path)
+path_btn.grid(row=7, column=1)
+
+save_btn = tk.Button(root, height=1, width=20, text="Snatch!", command=snatch_snatch)
+save_btn.grid(row=8, column=1)
+
+
+root.mainloop()
