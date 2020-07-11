@@ -1,8 +1,7 @@
-import os
-import subprocess
 import time
 import tkinter as tk
 from tkinter import filedialog
+from tkinter.messagebox import showinfo
 
 import requests
 from requests.exceptions import MissingSchema
@@ -10,13 +9,29 @@ from selenium import webdriver
 from selenium.common.exceptions import InvalidArgumentException, NoSuchElementException
 
 
+def no_uorp():
+    showinfo('Username or Password Error', 'Enter in reddit info and try again.')
+
+def no_path():
+    showinfo('No Path!', 'Select a path you would like to save your files in.')
+
+def page_not_found():
+    showinfo('Page Not Found', 'Make sure your username and password information is correct.')
+
 def snatch_snatch():
-    page_count = 0
-    driver = webdriver.Chrome('chromedriver.exe')
-
-
     user = urname_text.get()
     password = pass_text.get()
+    if user == '' or password == '':
+        no_uorp()
+        return None
+    elif path_text.get() == '':
+        no_path()
+        return None
+    else:
+        pass
+    page_count = 0
+    driver = webdriver.Chrome('chromedriver.exe')
+    driver.minimize_window()
 
     driver.get(f"https://old.reddit.com/login")
 
@@ -29,7 +44,14 @@ def snatch_snatch():
     search.submit()
 
     time.sleep(1)
-    driver.get(f"https://old.reddit.com/user/{user}/saved/")
+    site = driver.get(f"https://old.reddit.com/user/{user}/saved/")
+    if site == None:
+        driver.close()
+        page_not_found()
+        return None
+    else:
+        pass
+
 
     while True:
         stored_pics = []
@@ -82,7 +104,6 @@ def snatch_snatch():
 
     time.sleep(1)
     driver.quit()
-    driver.close()
 
 
 def path():
@@ -105,9 +126,8 @@ urname_text.grid(row=2, column=1)
 
 pass_label = tk.Label(text='Password')
 pass_label.grid(row=3, column=1)
-pass_text = tk.Entry(root)
+pass_text = tk.Entry(root, show='*')
 pass_text.grid(row=4, column=1)
-
 
 pass_label = tk.Label(text='Path')
 pass_label.grid(row=5, column=1)
@@ -119,6 +139,5 @@ path_btn.grid(row=7, column=1)
 
 save_btn = tk.Button(root, height=1, width=20, text="Snatch!", command=snatch_snatch)
 save_btn.grid(row=8, column=1)
-
 
 root.mainloop()
